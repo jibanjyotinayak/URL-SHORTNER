@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 350px;
+        }
+        h1 {
+            color: #007BFF;
+        }
+        p {
+            font-size: 14px;
+            color: #555;
+        }
+        .signup-banner {
+            background: #007BFF;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .signup-banner h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .signup-banner ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .signup-banner li {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            color: green;
+        }
+        .copy-btn {
+            background: #28a745;
+            display: none;
+        }
+        .copy-btn:hover {
+            background: #218838;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="signup-banner">
+            <h2>Sign up for free</h2>
+            <ul>
+                <li>✅ 5 short links/month</li>
+                <li>✅ 3 custom back-halves/month</li>
+                <li>✅ Unlimited link clicks</li>
+            </ul>
+        </div>
+        <h1>🔗 URL Shortener</h1>
+        <p>Enter your long URL below and get a shortened version instantly!</p>
+        <input type="text" id="urlInput" placeholder="Enter your URL here...">
+        <button onclick="shortenUrl()">Shorten URL</button>
+        <p id="shortUrl" class="result"></p>
+        <button id="copyButton" class="copy-btn" onclick="copyToClipboard()">Copy Link</button>
+        <div class="footer">Powered by <strong>ShortURL</strong></div>
+    </div>
+    
+    <script>
+        function shortenUrl() {
+            const url = document.getElementById("urlInput").value;
+            if (!url) {
+                alert("Please enter a valid URL");
+                return;
+            }
+            
+            fetch("http://localhost:8000/newurl", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    const shortUrl = `http://localhost:8000/redirect/${data.id}`;
+                    document.getElementById("shortUrl").innerHTML = `Shortened URL: <a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+                    document.getElementById("copyButton").style.display = "block";
+                    document.getElementById("copyButton").setAttribute("data-url", shortUrl);
+                } else {
+                    alert("Failed to shorten URL. Try again.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function copyToClipboard() {
+            const copyButton = document.getElementById("copyButton");
+            const shortUrl = copyButton.getAttribute("data-url");
+            navigator.clipboard.writeText(shortUrl).then(() => {
+                alert("Shortened URL copied to clipboard!");
+            }).catch(err => console.error("Failed to copy: ", err));
+        }
+    </script>
+</body>
+</html>
