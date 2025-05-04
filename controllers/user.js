@@ -6,9 +6,9 @@ require("dotenv");
 const { signUpSchema, loginSchema } = require("../validations/uservalidation");
 const secretKey = process.env.SECRET_KEY_JWT;
 const bcrypt = require("bcrypt");
-
+const session =  require("express-session")
 //signup User
- async function signUp(req, res) {
+async function signUp(req, res) {
   //validation using joi
   try {
     const newUser = req.body;
@@ -38,52 +38,51 @@ const bcrypt = require("bcrypt");
   } catch (error) {
     res.status(500).json({ message: "server error", error: error.message });
   }
-};
-//login functanlity
- async function logIn(req, res) {
-try {
-  const logInData = req.body;
-  const { error, value } = loginSchema.validate(logInData);
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
-  }
-
-  const user = await User.findOne({ email: value.email }).select('+password');
-  if (!user)
-    return res
-      .status(400)
-      .json({ message: "please provide resgistered email" });
-
-  const isMatch = await bcrypt.compare(value.password, user.password);
-  if (!isMatch){
-    res.status(401).json({message: "kindly provide valid password "});
-  }
-  const jwtToken =  jwt.sign({id:user._id},secretKey,{expiresIn:"5h"})
-res.status(200).json({message:"user loggedIn successfully",
-  user:user._id,
-  name:user.name,
-  token:jwtToken
-
-})
-
-} catch (error) {
-  res.status(500).json({error:error.message,
-    message:"something went wrong"
-  })
 }
- }
+//login functanlity
+async function logIn(req, res) {
+  try {
+    const logInData = req.body;
+    const { error, value } = loginSchema.validate(logInData);
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
 
-  
+    const user = await User.findOne({ email: value.email }).select("+password");
+    if (!user) {
+      return res.status(400).send("Please provide a registered email.");
+    }
 
-module.exports = {logIn,signUp}
+    const isMatch = await bcrypt.compare(value.password, user.password);
+    if (!isMatch) {
+      return res.status(401).send("Kindly provide a valid password.");
+    }
+
+    // ✅ Only set session after validation succeeds
+    req.session.user = { id: user._id, email: user.email };
+
+    // ✅ Optional: generate token if needed
+    // const jwtToken = jwt.sign({ id: user._id }, secretKey, { expiresIn: "5h" });
+
+    // ✅ Redirect to user dashboard
+    return res.redirect("/user");
+
+  } catch (error) {
+    res.status(500).send("Something went wrong: " + error.message);
+  }
+}
+
+
+
+
+module.exports = { logIn, signUp };
 //dashboard
 // async function getdashboard(req,res){
 
 // try {
-//   const user  =  
+//   const user  =
 // } catch (error) {
-  
-// }
 
+// }
 
 // }

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            position: relative;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px;
+        }
+        
+        .navbar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .username {
+            font-weight: bold;
+        }
+
+        .logout {
+            background: #dc3545;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .logout:hover {
+            background: #c82333;
+        }
+
+        button {
+            background: #007BFF;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <span class="username" id="userInfo"></span>
+        <button class="logout" onclick="logout()">Logout</button>
+    </div>
+    
+    <div class="container">
+        <h1>🔗 Welcome to Your Dashboard</h1>
+        <p>Shorten your URLs below:</p>
+        <input type="text" id="urlInput" placeholder="Enter your URL">
+        <button onclick="shortenUrl()">Shorten URL</button>
+        <p id="shortUrl" class="result"></p>
+        <div class="footer">Powered by <strong>ShortURL</strong></div>
+    </div>
+
+    <script>
+        function getUserInfo() {
+            fetch("http://localhost:8000/user")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.email) {
+                        document.getElementById("userInfo").innerText = `${data.name} (${data.email})`;
+                    } else {
+                        window.location.href = "login.html";
+                    }
+                })
+                .catch(() => window.location.href = "login.html");
+        }
+
+        function logout() {
+            fetch("http://localhost:8000/logout", { method: "POST" })
+                .then(() => window.location.href = "login.html");
+        }
+
+        getUserInfo();
+    </script>
+</body>
+</html>
