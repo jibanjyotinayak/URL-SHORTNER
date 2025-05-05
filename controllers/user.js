@@ -1,88 +1,55 @@
 const express = require("express");
-const app = express();
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-require("dotenv");
+require("dotenv").config(); // ✅ Load env variables
 const { signUpSchema, loginSchema } = require("../validations/uservalidation");
-const secretKey = process.env.SECRET_KEY_JWT;
 const bcrypt = require("bcrypt");
-const session =  require("express-session")
-//signup User
+
+// Signup User
 async function signUp(req, res) {
-  //validation using joi
   try {
-    const newUser = req.body;
-    const { error, value } = signUpSchema.validate(newUser);
+    const { error, value } = signUpSchema.validate(req.body);
     if (error) {
-      return res.status(400).json({ messgae: error.details[0].message });
+      return res.status(400).json({ message: error.details[0].message });
     }
 
     const existingUser = await User.findOne({ email: value.email });
-    if (existingUser) return res.status(200).json({ message: "user exists" });
+    if (existingUser) return res.status(409).json({ message: "User already exists" });
 
     const user = new User(value);
     await user.save();
-    const token = jwt.sign({ id: user._id }, secretKey, {
-      expiresIn: "5h",
-    });
 
-    res.status(201).json({
-      message: "user successfuly registered ",
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-      },
-    });
+ 
+     const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY_JWT, { expiresIn: "5h" });
+     return res.status(201).json({ message: "Registered", token });
+
   } catch (error) {
-    res.status(500).json({ message: "server error", error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 }
-//login functanlity
+
+// Login functionality
 async function logIn(req, res) {
   try {
-    const logInData = req.body;
-    const { error, value } = loginSchema.validate(logInData);
-    if (error) {
-      return res.status(400).send(error.details[0].message);
-    }
+    const { error, value } = loginSchema.validate(req.body);
+    if (error) return res.status(400).json({ message: error.details[0].message });
 
     const user = await User.findOne({ email: value.email }).select("+password");
-    if (!user) {
-      return res.status(400).send("Please provide a registered email.");
-    }
+    if (!user) return res.status(400).json({ message: "Invalid email or password" });
 
     const isMatch = await bcrypt.compare(value.password, user.password);
-    if (!isMatch) {
-      return res.status(401).send("Kindly provide a valid password.");
+    if (!isMatch) return res.status(401).json({ message: "Invalid email or password" });
+    const jwtToken  =  jwt.sign({ email: user.email }, process.env.SECRET_KEY_JWT, { expiresIn: "5h" })
+    if (!jwtToken){
+      return res.status(500).json({message:"jwt Token not found"})
     }
+    return res.status(200).json({ message: "Login successful", token: jwtToken });
 
-    // ✅ Only set session after validation succeeds
-    req.session.user = { id: user._id, email: user.email };
-
-    // ✅ Optional: generate token if needed
-    // const jwtToken = jwt.sign({ id: user._id }, secretKey, { expiresIn: "5h" });
-
-    // ✅ Redirect to user dashboard
-    return res.redirect("/user");
+    //return res.redirect("/user");
 
   } catch (error) {
-    res.status(500).send("Something went wrong: " + error.message);
+    res.status(500).json({ message: "Something went wrong", error: error.message });
   }
 }
 
-
-
-
 module.exports = { logIn, signUp };
-//dashboard
-// async function getdashboard(req,res){
-
-// try {
-//   const user  =
-// } catch (error) {
-
-// }
-
-// }

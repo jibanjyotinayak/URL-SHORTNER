@@ -1,59 +1,43 @@
 const express = require("express");
-const session = require("express-session")
+const session = require("express-session");
+const path = require("path");
+const dotenv = require("dotenv");
+dotenv.config();
 const app = express();
 const PORT = 8000;
-const mongoose = require ('mongoose')
-const db = require("./connect");
-const urlRoute = require ('./routes/url')
-const URL = require('./models/url')
-const userRoute =  require("./routes/user");
-require("dotenv")
-const secretkey = process.env.SECRET_KEY_JWT
 
-const path = require('path');
+// MongoDB connection (assumes connect.js handles this)
+require("./connect");
+// Routes
+const userRoute = require("./routes/user");
+const urlRoute = require("./routes/url");
+const secretkey = process.env.SECRET_KEY_JWT;
+const authJwt = require("./auth/authjwt"); // adjust path if needed
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Session middleware
-
-
-// Serve static files
 app.use(express.static(path.join(__dirname, "public")));
-
-//Show homepage or redirect to login
+//  Public HTML pages
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "home.html")); // Always serve home.html
-  });
-  app.get("/signup", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "signup.html"));
-  });// Always serve home.html
-
-  app.get("/login", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "login.html"));
-  });
-  app.use(session({
-    secret: secretkey,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      maxAge: 60 * 60 * 1000, // 1 hour
-    }
-  }));
-  app.get("/user", (req, res) => {
-    if (!req.session.user) {
-      return res.redirect("/login");
-    }
-    res.sendFile(path.join(__dirname, "private", "user.html")); // move user.html to another folder
-  });
-  
-// Rotes
+  res.sendFile(path.join(__dirname, "public", "home.html"));
+});
+app.get("/signup", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "signup.html"));
+});
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "login.html"));
+});
+app.get("/api/me", authJwt, (req, res) => {
+  return res.json({ email: req.user.email });
+});
 app.use("/", userRoute);
-app.use("/", urlRoute);
+// Routes for short URL (prefixed to avoid conflicts)
+app.use("/u", urlRoute); // Only handles /u/:shortId
+app.get("/user", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/private/user.html"));
+});
 
-app.listen(PORT,()=>{
-    console.log(`server is running on ${PORT}`);
-})
-
-
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+});

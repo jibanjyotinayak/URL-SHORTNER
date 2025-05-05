@@ -97,24 +97,35 @@
 
     <script>
         function getUserInfo() {
-            fetch("http://localhost:8000/user")
-                .then(response => response.json())
-                .then(data => {
-                    if (data.email) {
-                        document.getElementById("userInfo").innerText = `${data.name} (${data.email})`;
-                    } else {
-                        window.location.href = "login.html";
-                    }
-                })
-                .catch(() => window.location.href = "login.html");
-        }
+    const token = localStorage.getItem("token"); // Read token
 
-        function logout() {
-            fetch("http://localhost:8000/logout", { method: "POST" })
-                .then(() => window.location.href = "login.html");
+    fetch("/api/me", {
+        headers: {
+            Authorization: `Bearer ${token}`
         }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Not logged in");
+        return response.json();
+    })
+    .then(data => {
+        if (data.email) {
+            document.getElementById("userInfo").innerText = `${data.email}`;
+        } else {
+            window.location.href = "/login";
+        }
+    })
+    .catch(() => window.location.href = "/login");
+}
 
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+}
+
+    
         getUserInfo();
     </script>
+    
 </body>
 </html>

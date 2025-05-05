@@ -2,7 +2,7 @@
 const URL = require("../models/url");
 const shortid = require("shortid") ;
 const jwt = require("jsonwebtoken")
-require("dotenv")
+require("dotenv").config()
 const secretKey = process.env.SECRET_KEY_JWT
 
 async function handleGenerateNewShortUrl(req, res) {
