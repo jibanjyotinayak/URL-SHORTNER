@@ -109,8 +109,8 @@
         return response.json();
     })
     .then(data => {
-        if (data.email) {
-            document.getElementById("userInfo").innerText = `${data.email}`;
+        if (data.email && data.name) {
+            document.getElementById("userInfo").innerText = `${data.name} ${data.email}`;
         } else {
             window.location.href = "/login";
         }

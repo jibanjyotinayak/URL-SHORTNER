@@ -29,7 +29,7 @@ app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 app.get("/api/me", authJwt, (req, res) => {
-  return res.json({ email: req.user.email });
+  return res.json({ name:req.user.name,email: req.user.email });
 });
 app.use("/", userRoute);
 // Routes for short URL (prefixed to avoid conflicts)

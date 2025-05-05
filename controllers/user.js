@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config(); // ✅ Load env variables
 const { signUpSchema, loginSchema } = require("../validations/uservalidation");
 const bcrypt = require("bcrypt");
+const { eventNames } = require("../models/url");
 
 // Signup User
 async function signUp(req, res) {
@@ -20,7 +21,7 @@ async function signUp(req, res) {
     await user.save();
 
  
-     const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY_JWT, { expiresIn: "5h" });
+     const token = jwt.sign({name:user.name, email: user.email }, process.env.SECRET_KEY_JWT, { expiresIn: "5h" });
      return res.status(201).json({ message: "Registered", token });
 
   } catch (error) {
@@ -39,7 +40,7 @@ async function logIn(req, res) {
 
     const isMatch = await bcrypt.compare(value.password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid email or password" });
-    const jwtToken  =  jwt.sign({ email: user.email }, process.env.SECRET_KEY_JWT, { expiresIn: "5h" })
+    const jwtToken  =  jwt.sign({ name:user.name,email: user.email }, process.env.SECRET_KEY_JWT, { expiresIn: "5h" })
     if (!jwtToken){
       return res.status(500).json({message:"jwt Token not found"})
     }

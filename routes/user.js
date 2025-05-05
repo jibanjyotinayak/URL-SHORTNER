@@ -9,7 +9,7 @@ userRoute.post("/signup",signUp);
 userRoute.get("/api/me", authJwt, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    res.json({ id: user._id, email: user.email });
+    res.json({ name: user.name, email: user.email });
   } catch (err) {
     res.status(500).json({ message: "User not found" });
   }
