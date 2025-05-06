@@ -1,9 +1,6 @@
-
 const URL = require("../models/url");
 const shortid = require("shortid") ;
-const jwt = require("jsonwebtoken")
 require("dotenv").config()
-const secretKey = process.env.SECRET_KEY_JWT
 
 async function handleGenerateNewShortUrl(req, res) {
   const body = req.body;
@@ -21,7 +18,7 @@ async function handleGenerateNewShortUrl(req, res) {
     return res.json({ shortUrl: `${baseUrl}/${shortID}` });
 
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" ,message:error.message});
   }
 }
 

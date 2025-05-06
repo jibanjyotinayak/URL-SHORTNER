@@ -11,7 +11,8 @@ userRoute.get("/api/me", authJwt, async (req, res) => {
     const user = await User.findById(req.user.id);
     res.json({ name: user.name, email: user.email });
   } catch (err) {
-    res.status(500).json({ message: "User not found" });
+
+    res.status(500).json({ message: "User not found" ,error:err.message});
   }
 });
 

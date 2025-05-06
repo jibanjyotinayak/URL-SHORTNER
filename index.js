@@ -1,5 +1,5 @@
 const express = require("express");
-const session = require("express-session");
+//const session = require("express-session");
 const path = require("path");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -11,7 +11,7 @@ require("./connect");
 // Routes
 const userRoute = require("./routes/user");
 const urlRoute = require("./routes/url");
-const secretkey = process.env.SECRET_KEY_JWT;
+//const secretkey = process.env.SECRET_KEY_JWT;
 const authJwt = require("./auth/authjwt"); // adjust path if needed
 
 

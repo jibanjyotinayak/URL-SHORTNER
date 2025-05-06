@@ -1,10 +1,8 @@
-const express = require("express");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 require("dotenv").config(); // ✅ Load env variables
 const { signUpSchema, loginSchema } = require("../validations/uservalidation");
 const bcrypt = require("bcrypt");
-const { eventNames } = require("../models/url");
 
 // Signup User
 async function signUp(req, res) {
